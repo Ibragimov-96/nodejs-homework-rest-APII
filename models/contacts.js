@@ -4,7 +4,8 @@ const {Contact}= require('../db/contactModel.js');
 
 
 const listContacts = async (req, res) => {
-  const list = await Contact.find({})
+ const {_id}= req.user
+  const list = await Contact.find({owner:_id})
 
 return list
 }
@@ -21,9 +22,10 @@ const removeContact = async (contactId) => {
   return list
 }
 
-const addContact = async (name, email, phone) => {
-
-  const list = new Contact ({name, email, phone})
+const addContact = async (req,name, email, phone) => {
+  const {_id}= req.user
+ 
+  const list = new Contact ({name, email, phone,owner:_id},_id)
  
 await list.save()
 }
@@ -43,11 +45,13 @@ const updateStatusContact = async (contactId,body)=>{
   const list = await Contact.findByIdAndUpdate(contactId,{$set:{favorite}})
   await list.save()
 }
+
 module.exports = {
   listContacts,
   getContactById,
   removeContact,
   addContact,
   updateContact,
-  updateStatusContact
+  updateStatusContact,
+ 
 }
