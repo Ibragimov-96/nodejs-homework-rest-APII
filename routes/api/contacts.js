@@ -1,7 +1,7 @@
 const express = require("express");
 const Joi = require("joi");
 
-const validateBody = require("./middlewares/validateBody");
+const {validateBody} = require("./middlewares/validateBody");
 const addContactShema = Joi.object({
   name: Joi.string().required(),
   email: Joi.string().required(),
@@ -16,6 +16,7 @@ const schemaUpdate = Joi.object({
 const schemaFavorite = Joi.object({
   favorite: Joi.bool()
 })
+
 const {
   listContacts,
   getContactById,
@@ -23,11 +24,13 @@ const {
   addContact,
   updateContact,
   updateStatusContact,
+
 } = require("../../models/contacts");
 const router = express.Router();
-
+const {autMid}= require('./middlewares/autorizeMidlewears')
+router.use(autMid)
 router.get("/", async (req, res, next) => {
-  const data = await listContacts();
+  const data = await listContacts(req,res);
 
   res.status(200).send(data);
 });
@@ -40,7 +43,7 @@ router.get("/:contactId", async (req, res) => {
 
 router.post("/", validateBody(addContactShema), async (req, res, next) => {
   const { name, email, phone } = req.body;
-  const data = await addContact(name, email, phone);
+  const data = await addContact(req,name, email, phone);
   res.status(201).send(data);
 });
 
@@ -66,4 +69,5 @@ router.patch(
     res.send(data);
   }
 );
+
 module.exports = router;
