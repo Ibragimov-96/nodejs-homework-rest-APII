@@ -1,48 +1,64 @@
 const express = require("express");
 const Joi = require("joi");
-const router = express.Router();
-const {validateEmail} = require("./middlewares/validateBody");
 
-const {autMid}= require('./middlewares/autorizeMidlewears')
+const path = require("path");
+const multer = require("multer");
+
+const storageAvatar = path.join(__dirname, "../../tmp");
+
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, storageAvatar);
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  },
+});
+
+const upload = multer({ storage: storage });
+const router = express.Router();
+const { validateEmail } = require("./middlewares/validateBody");
+
+const { autMid } = require("./middlewares/autorizeMidlewears");
 
 const {
   registrControl,
-    loginControl,
-    logOut,
-    currentUser
-  } = require("../../models/user");
+  loginControl,
+  logOut,
+  currentUser,
+  updateAvatar
+} = require("../../models/user");
 
 const reqistration = Joi.object({
-    email: Joi.string(),
-    password: Joi.string(),
+  email: Joi.string(),
+  password: Joi.string(),
+});
+const login = Joi.object({
+  email: Joi.string(),
+  password: Joi.string(),
+});
+
+router.post("/register", validateEmail(reqistration), async (req, res) => {
+  await registrControl(req, res);
+});
+router.post("/login", validateEmail(login), async (req, res) => {
+  await loginControl(req, res);
   
-  })
-  const login = Joi.object({
-    email: Joi.string(),
-    password: Joi.string(),
-  
-  })
+});
+router.use(autMid);
 
-router.post("/register",validateEmail(reqistration),
-async (req,res)=>{
- await registrControl(req,res)
-})
-router.post("/login",validateEmail(login),
-async (req,res)=>{
-  await loginControl(req,res)
- })
- router.use(autMid)
- router.post("/logout",async(req,res)=>{
-  await logOut(req,res)
-  res.status(204).json("Bearer {{token}}")
- }
+router.post("/logout", async (req, res) => {
+  await logOut(req, res);
+  res.status(204).json("Bearer {{token}}");
+});
+router.get("/current", async (req, res) => {
+  await currentUser(req, res);
+  res.status(204).json("Bearer {{token}}");
+});
 
- )
-
- router.get("/current",async(req,res)=>{
-  await currentUser(req,res)
-  res.status(204).json("Bearer {{token}}")
- }
-
- )
+router.patch("/avatar", upload.single("myAvatar"), async (req,res)=>{
+ await updateAvatar(req,res)
+});
 module.exports = router;
+
