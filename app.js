@@ -31,7 +31,7 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   res.status(500).json({ message: err.message });
 });
-app.listen(3001, () => {
+app.listen(process.env.PORT , () => {
   console.log("server is asing");
 });
 module.exports = app;
