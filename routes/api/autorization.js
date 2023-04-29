@@ -6,7 +6,6 @@ const multer = require("multer");
 
 const storageAvatar = path.join(__dirname, "../../tmp");
 
-
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, storageAvatar);
@@ -27,7 +26,9 @@ const {
   loginControl,
   logOut,
   currentUser,
-  updateAvatar
+  updateAvatar,
+  verification,
+  reVerification,
 } = require("../../models/user");
 
 const reqistration = Joi.object({
@@ -44,7 +45,6 @@ router.post("/register", validateEmail(reqistration), async (req, res) => {
 });
 router.post("/login", validateEmail(login), async (req, res) => {
   await loginControl(req, res);
-  
 });
 router.use(autMid);
 
@@ -57,8 +57,16 @@ router.get("/current", async (req, res) => {
   res.status(204).json("Bearer {{token}}");
 });
 
-router.patch("/avatar", upload.single("myAvatar"), async (req,res)=>{
- await updateAvatar(req,res)
+router.patch("/avatar", upload.single("myAvatar"), async (req, res) => {
+  await updateAvatar(req, res);
+});
+router.get("/verify/:verificationToken", async (req, res) => {
+  await verification(req, res);
+});
+
+router.post("/verify/:verificationToken", async (req, res) => {
+  await reVerification(req, res);
 });
 module.exports = router;
 
+//"/verify/:verificationToken"
